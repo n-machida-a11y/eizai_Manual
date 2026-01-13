@@ -1,0 +1,242 @@
+// --- 設定 ---
+// 1. 要望の書き込み先・リンク保存先スプレッドシートID
+var REQUEST_SHEET_ID = '1AMdnB11kYduQ-Ml2DkEnAyXJkFBGfqFn0myXVJjcQBc';
+// 2. 社員マスタ（名前取得用）
+var MASTER_DB_ID = '1CJchjuO03CB0OYmyzdtaOq3N71fRXddG7QBSCJPn1GM';
+// 3. 要望受付時の通知先メールアドレス
+var ADMIN_EMAIL = 'n-machida@race-number.co.jp';
+// 4. (v13) マニュアル管理者（URL編集権限）
+var ADMIN_USERS = ['machida@nne.co.jp', 'hirao@nne.co.jp'];
+// 5. (v13) 各シート名
+var SHEET_NAMES = {
+  REQUESTS: 'シート1', // 要望リストのシート名
+  LINKS: 'Links' // (v13) URL保存用のシート名
+};
+
+
+/**
+ * WebアプリのGETリクエストハンドラ
+ */
+function doGet(e) {
+  var ui = HtmlService.createTemplateFromFile('manual.html');
+  
+  // ユーザー情報をHTML側に渡す
+  var userInfo = getUserInfo_();
+  ui.userInfo = JSON.stringify(userInfo);
+  
+  return ui.evaluate()
+    .setTitle('利用者マニュアル')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+/**
+ * ログインユーザーの情報を取得
+ * (v13 修正: isAdminフラグを追加)
+ */
+function getUserInfo_() {
+  var email = Session.getEffectiveUser().getEmail();
+  var name = 'ゲスト';
+
+  try {
+    var ss = SpreadsheetApp.openById(MASTER_DB_ID);
+    var data = getSheetData_(ss.getSheetByName('社員マスタ')); 
+    
+    for (var i = 0; i < data.length; i++) {
+      if (data[i]['アドレス'] === email) {
+        name = data[i]['社員名'];
+        break;
+      }
+    }
+  } catch (e) {
+    Logger.log('getUserInfo_ Error: ' + e);
+  }
+  
+  // (v13) 管理者かどうかを判定
+  var isAdmin = ADMIN_USERS.indexOf(email) > -1;
+  
+  return { name: name, email: email, isAdmin: isAdmin }; // (v13) isAdmin を追加
+}
+
+/**
+ * (クライアントから呼び出し) 修正要望をスプレッドシートに送信する
+ * (v12 修正: 依頼者情報を削除)
+ */
+function submitRequest(requestData) {
+  try {
+    var ss = SpreadsheetApp.openById(REQUEST_SHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAMES.REQUESTS); // (v13) シート名変数を使用
+    
+    var status = '受付済';
+    var requestDate = new Date();
+    
+    // スプレッドシートに行を追加 (v12 修正: 依頼者情報を削除)
+    // (ヘッダー: 受付日時, タイトル, 詳細, ステータス)
+    sheet.appendRow([
+      requestDate,
+      requestData.title,
+      requestData.detail,
+      status
+    ]);
+    
+    // 管理者へメール通知 (v12 修正: 依頼者情報を削除)
+    var userInfo = getUserInfo_(); // (v12) 誰からのメールか分かるようにするため再取得
+    
+    MailApp.sendEmail({
+      to: ADMIN_EMAIL,
+      subject: '[マニュアル修正要望] ' + requestData.title,
+      body: 'マニュアルの修正要望が届きました。\n' +
+            '（送信者: ' + userInfo.name + ' / ' + userInfo.email + '）\n\n' + // (v12) メール本文には送信者情報を記載
+            '受付日時: ' + Utilities.formatDate(requestDate, Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') + '\n' +
+            'ステータス: ' + status + '\n' +
+            'タイトル: ' + requestData.title + '\n\n' +
+            '詳細:\n' + requestData.detail + '\n\n' +
+            'スプレッドシートで内容を確認してください:\n' +
+            ss.getUrl()
+    });
+    
+    return { status: 'success', message: '修正要望を送信しました。' };
+  } catch (e) {
+    Logger.log('submitRequest Error: ' + e);
+    return { status: 'error', message: '送信に失敗しました: ' + e.message };
+  }
+}
+
+/**
+ * (クライアントから呼び出し) 修正要望の一覧を取得する
+ */
+function getRequestList() {
+  try {
+    var ss = SpreadsheetApp.openById(REQUEST_SHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAMES.REQUESTS); // (v13) シート名変数を使用
+    
+    var data = getSheetData_(sheet);
+    
+    // 最新のものが上にくるように逆順にする
+    return { status: 'success', data: data.reverse() };
+  } catch (e) {
+    Logger.log('getRequestList Error: ' + e);
+    return { status: 'error', message: '一覧の取得に失敗しました: ' + e.message, data: [] };
+  }
+}
+
+// --- (v13) URL管理機能 ---
+
+/**
+ * (v13 新規) 保存されているアプリのリンクを取得する
+ */
+function getAppLinks() {
+  try {
+    var ss = SpreadsheetApp.openById(REQUEST_SHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAMES.LINKS);
+    
+    if (!sheet) {
+      // シートがない場合は初期化
+      sheet = ss.insertSheet(SHEET_NAMES.LINKS);
+      // ヘッダーとデフォルト値を書き込む
+      var defaultData = [
+        ['ID', 'URL', '説明'],
+        ['salesApp', 'https://script.google.com/a/macros/nne.co.jp/s/AKfycbzkfxV6eBLjc3eaZbmSDuIoL9Dt2VdZVHoMheREBnGxlWmnvhzPRN4Y4zde29rAz2BF/exec', '営業用日報システム Webアプリ'],
+        ['salesDB', 'https://docs.google.com/spreadsheets/d/1CJchjuO03CB0OYmyzdtaOq3N71fRXddG7QBSCJPn1GM/edit?gid=0#gid=0', '営業用日報システム DB'],
+        ['generalApp', 'https://script.google.com/a/macros/nne.co.jp/s/AKfycbzlklzX0RHvDCfyOxwUQVSTqgZSFtYpeKRJLybqIE_-A3qTGEShsww2vjNnbGJ_2T5W/exec', '一般経費精算システム Webアプリ'],
+        ['generalDB', 'https://docs.google.com/spreadsheets/d/15PGONpnqj6UDZa5076nXvKa2sUTg-_XFxHMDjBcgBFM/edit?gid=0#gid=0', '一般経費精算システム データ用DB'],
+        ['accountingApp', 'https://script.google.com/a/macros/nne.co.jp/s/AKfycbyVsHGzQF9PYvTWG2f4sOq12bHj0iHLR9kjERZIMQahwz7HfqNcoh5Vp8hEeJVGiLQc0w/exec', '経理用 支払処理アプリ Webアプリ'],
+        ['accountingDB', 'https://docs.google.com/spreadsheets/d/17WAK08P8zHyfwgbnsXR135XwabbuDGA2BWWu3q1VU70/edit?gid=0#gid=0', '経理用 支払処理アプリ DB']
+      ];
+      sheet.getRange(1, 1, defaultData.length, defaultData[0].length).setValues(defaultData);
+      sheet.hideSheet(); // 普段は隠しておく
+    }
+    
+    var data = getSheetData_(sheet);
+    var links = {};
+    data.forEach(function(row) {
+      links[row.ID] = row.URL;
+    });
+    
+    return { status: 'success', links: links };
+  } catch (e) {
+    Logger.log('getAppLinks Error: ' + e);
+    return { status: 'error', message: 'リンクの取得に失敗しました: ' + e.message, links: {} };
+  }
+}
+
+/**
+ * (v13 新規) アプリのリンクを保存する
+ */
+function saveAppLinks(linksToSave) {
+  // 管理者かどうかを再チェック
+  var userInfo = getUserInfo_();
+  if (!userInfo.isAdmin) {
+    return { status: 'error', message: '保存権限がありません。' };
+  }
+  
+  try {
+    var ss = SpreadsheetApp.openById(REQUEST_SHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAMES.LINKS);
+    
+    if (!sheet) {
+      throw new Error('Linksシートが見つかりません。');
+    }
+    
+    var range = sheet.getDataRange();
+    var values = range.getValues();
+    var headers = values.shift(); // ヘッダー
+    
+    var idCol = headers.indexOf('ID');
+    var urlCol = headers.indexOf('URL');
+    
+    // values (データ行のみ) をループして更新
+    var updated = false;
+    for (var i = 0; i < values.length; i++) {
+      var id = values[i][idCol];
+      if (linksToSave[id]) {
+        // GASの行インデックスは1-based、valuesのインデックスは0-basedなので、+2する
+        sheet.getRange(i + 2, urlCol + 1).setValue(linksToSave[id]);
+        updated = true;
+      }
+    }
+    
+    if (!updated) {
+      throw new Error('更新対象のIDが見つかりませんでした。');
+    }
+    
+    return { status: 'success', message: 'URLを更新しました。' };
+  } catch (e) {
+    Logger.log('saveAppLinks Error: ' + e);
+    return { status: 'error', message: 'リンクの保存に失敗しました: ' + e.message };
+  }
+}
+
+
+/**
+ * (HELPER) 汎用: シートデータをオブジェクト配列に変換
+ */
+function getSheetData_(sheet) {
+  if (!sheet) {
+    Logger.log('getSheetData_: 対象のシートが見つかりません。');
+    return [];
+  }
+  if (sheet.getLastRow() < 2 || sheet.getLastColumn() < 1) {
+    if (sheet.getLastRow() === 1) return [];
+    return [];
+  }
+  
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  
+  var data = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+  var headers = data.shift(); 
+  
+  var result = data.map(function(row) {
+    var obj = {};
+    headers.forEach(function(header, index) {
+      if (row[index] instanceof Date) {
+         obj[header] = Utilities.formatDate(row[index], Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm:ss');
+      } else {
+        obj[header] = row[index];
+      }
+    });
+    return obj;
+  });
+  
+  return result;
+}
