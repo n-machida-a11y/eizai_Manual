@@ -236,6 +236,21 @@
             color: #0f5132;
             background-color: #d1e7dd;
         }
+
+        /* レスポンシブ対応: スマホでタブを上に配置 */
+        @media (max-width: 768px) {
+            .manual-container {
+                flex-direction: column;
+            }
+            .manual-nav {
+                width: 100%;
+                position: static;
+                margin-bottom: 1.5rem;
+            }
+            .manual-content {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -255,7 +270,7 @@
                 利用者マニュアル
                 <span class="ms-3 fs-6 text-muted">日報・経費精算システム</span>
             </h1>
-            <span id="user-info" class="text-muted fs-6"></span>
+            <span id="user-info" class="text-muted fs-6 d-none d-md-inline"></span>
         </div>
     </header>
 
@@ -338,7 +353,7 @@
                             </div>
                             <div class="col-12">
                                 <div class="p-3 border rounded bg-light">
-                                    <h4 class="fw-semibold text-dark">3. 経理用 支払処理アプリ</h4>
+                                    <h4 class="fw-semibold text-dark">3. 経理用 振込処理アプリ</h4>
                                     <ul class="list-unstyled p-0 m-0 mt-2 text-sm text-secondary">
                                         <li><strong>対象者:</strong> 経理担当者</li>
                                         <li><strong>目的:</strong> 上記2つのシステムから最終承認されたすべての経費を集約し、支払処理を行います。</li>
@@ -349,7 +364,7 @@
                     </section>
                 </div>
                 
-                <!-- 2. アプリ/DB一覧 (v13 修正) -->
+                <!-- 2. アプリ/DB一覧 -->
                 <div class="tab-pane fade" id="tab-links" role="tabpanel" aria-labelledby="nav-links-tab">
                     <section id="links">
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -357,7 +372,7 @@
                                 <i class="bi bi-link-45deg text-primary"></i>
                                 アプリ・データベース一覧
                             </h2>
-                            <!-- (v13) 管理者用編集ボタン -->
+                            <!-- 管理者用編集ボタン -->
                             <div id="admin-edit-buttons-placeholder" style="display: none;">
                                 <button class="btn btn-sm btn-outline-primary" id="edit-links-btn">
                                     <i class="bi bi-pencil-fill"></i> URLを編集
@@ -386,7 +401,7 @@
                             </div>
                         </div>
                         
-                        <!-- (v13) リンクのHTMLテンプレート -->
+                        <!-- リンクのHTMLテンプレート -->
                         <template id="link-item-template">
                             <div class="link-placeholder" data-id="{ID}">
                                 <strong>{説明}</strong>
@@ -398,7 +413,6 @@
                                 </div>
                             </div>
                         </template>
-                        
                     </section>
                 </div>
 
@@ -419,9 +433,13 @@
                             <li><a href="#" onclick="document.getElementById('nav-links-tab').click(); return false;">「営業用日報システム」</a>を開きます。</li>
                             <li><strong>「日報入力」</strong>タブが選択されていることを確認します。</li>
                             <li><strong>日付</strong>を選択します。（デフォルトは本日）</li>
-                            <li><strong>メーター情報</strong>（始時、終時、私有走行）を入力すると、自動で走行距離が計算されます。</li>
+                            <li><strong>メーター・走行距離</strong>を入力します。
+                                <ul>
+                                    <li>「始時メーター」「終時メーター」「私有走行(km)」を入力すると、「本日の走行距離」が自動計算されます。</li>
+                                </ul>
+                            </li>
                             <li><strong>タイムシート</strong>に、30分単位で「活動区分」（出勤、移動、商談など）と「活動内容」を入力します。
-                                <small>※「移動」「商談」は自動で時間が集計されます。</small>
+                                <small>※「移動」「商談」などの時間は自動で集計され、画面上部に合計時間が表示されます。</small>
                             </li>
                             <li>経費が発生した時間帯の右側にある<span class="key-button"><i class="bi bi-plus"></i></span>ボタンを押します。</li>
                         </ol>
@@ -432,7 +450,7 @@
                                 <i class="bi bi-pencil-square"></i> 日報入力・編集
                             </div>
                             <div class="mockup-body">
-                                <div class="mb-3 row g-3">
+                                <div class="row g-3 mb-3">
                                     <div class="col-md-3">
                                         <label class="form-label">日付 <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control" value="2025-11-12">
@@ -443,6 +461,24 @@
                                     </div>
                                 </div>
                                 <hr>
+                                <div class="row g-3 align-items-end mb-3">
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small">始時メーター</label>
+                                        <input type="number" class="form-control" value="10500">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small">終時メーター</label>
+                                        <input type="number" class="form-control" value="10550">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small">私有走行</label>
+                                        <input type="number" class="form-control" value="0">
+                                    </div>
+                                    <div class="col-6 col-md-3 text-end">
+                                        <span class="text-muted small">走行距離</span>
+                                        <h4 class="text-primary mb-0">50 km</h4>
+                                    </div>
+                                </div>
                                 <table class="mockup-table">
                                     <thead>
                                         <tr>
@@ -466,24 +502,6 @@
                                             <td class="text-center"><span class="mockup-expense-btn"><i class="bi bi-plus"></i></span></td>
                                         </tr>
                                         <tr>
-                                            <th>08:00</th>
-                                            <td><input type="text" value="移動"></td>
-                                            <td><input type="text"></td>
-                                            <td class="text-center"><span class="mockup-expense-btn"><i class="bi bi-plus"></i></span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>08:30</th>
-                                            <td><input type="text" value="商談"></td>
-                                            <td><input type="text" value="〇〇商事様 デモ"></td>
-                                            <td class="text-center"><span class="mockup-expense-btn"><i class="bi bi-plus"></i></span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>09:00</th>
-                                            <td><input type="text" value="商談"></td>
-                                            <td><input type="text" value="〇〇商事様 デモ"></td>
-                                            <td class="text-center"><span class="mockup-expense-btn has-expense"><i class="bi bi-plus"></i></span></td>
-                                        </tr>
-                                        <tr>
                                             <th>...</th>
                                             <td>...</td>
                                             <td>...</td>
@@ -498,22 +516,24 @@
                         <ol>
                             <li>ポップアップ画面（経費登録モーダル）が表示されます。</li>
                             <li><strong>利用日</strong>、<strong>経費項目</strong>、<strong>金額（税込）</strong>を入力します。</li>
-                            <li><strong>（重要）</strong>
-                                「日当」や「宿泊費」を選択すると、<strong>規定額が自動で入力</strong>されます。
-                                <ul>
-                                    <li><strong>宿泊費の場合:</strong> 「エリア」を選択すると、宿泊費＋エリア追加分が自動計算されます。</li>
-                                    <li>自動入力された金額が上限額となります。</li>
-                                </ul>
+                            <li><strong>精算方法</strong>を選択します（デフォルト：仮払金）。
+                                <ul><li>現金で立て替えた場合は「現金」を選択してください。</li></ul>
                             </li>
-                            <li><strong>領収書アップロード</strong>から、レシートや領収書の写真（画像）を添付します。
-                                <small>※日当や規定額の宿泊費など、領収書が不要な場合は添付しなくて構いません。</small>
+                            <li><strong>（カード利用時）</strong>
+                                「カード利用」のスイッチをONにすると、カード利用額の入力欄が表示されます。
+                                <ul><li>通常は税込金額と同額が自動入力されます。</li></ul>
                             </li>
+                            <li><strong>（自動計算）</strong>
+                                下部に<strong>「精算金額」</strong>が表示されます。（金額 - カード利用額）
+                                <small>※ここが会社から振り込まれる金額となります。</small>
+                            </li>
+                            <li><strong>領収書アップロード</strong>から、レシートや領収書の写真を添付します。</li>
                             <li><span class="key-action">この内容で登録</span> ボタンを押してモーダルを閉じます。
                                 <small>※ボタンが赤色 <span class="key-button" style="background-color: #dc3545; color: white;"><i class="bi bi-plus"></i></span> に変わっていればOKです。</small>
                             </li>
                         </ol>
 
-                        <!-- モックアップ: 経費モーダル -->
+                        <!-- モックアップ: 経費モーダル (最新版) -->
                         <div class="mockup-container">
                             <div class="mockup-modal-content">
                                 <div class="mockup-header d-flex justify-content-between align-items-center">
@@ -521,31 +541,40 @@
                                     <button type="button" class="btn-close" disabled></button>
                                 </div>
                                 <div class="mockup-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">経費項目 <span class="text-danger">*</span></label>
-                                        <select class="form-select">
-                                            <option>選択してください</option>
-                                            <option selected>宿泊費</option>
-                                            <option>日当</option>
-                                            <option>交通費</option>
-                                            <option>...</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">エリア <span class="text-danger">*</span></label>
-                                        <select class="form-select">
-                                            <option>エリアを選択</option>
-                                            <option selected>東京都23区</option>
-                                            <option>その他</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">金額 (円) <span class="text-danger">*</span></label>
-                                        <input type="tel" class="form-control" value="12,000">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">領収書アップロード</label>
-                                        <input type="file" class="form-control" disabled>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">経費項目 <span class="text-danger">*</span></label>
+                                            <select class="form-select">
+                                                <option selected>宿泊費</option>
+                                                <option>...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">精算方法</label>
+                                            <select class="form-select">
+                                                <option selected>仮払金</option>
+                                                <option>現金</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">金額 (税込) <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" value="12,000">
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-center mt-4">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" checked>
+                                                <label class="form-check-label fw-bold">カード利用</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 bg-light p-3 rounded">
+                                            <label class="form-label text-primary">カード利用額 (円)</label>
+                                            <input type="text" class="form-control" value="12,000">
+                                        </div>
+                                        <div class="col-12 bg-light p-3 rounded mt-2">
+                                            <label class="form-label fw-bold">精算金額 (自動計算)</label>
+                                            <div class="fs-4 text-primary">0 円</div>
+                                            <small class="text-muted">※金額(税込) - カード利用額</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -554,24 +583,8 @@
                         <h4>A-3. 申請を提出する</h4>
                         <ol>
                             <li>すべての日報・経費を入力したら、画面下部のボタンを押します。</li>
-                            <li><span class="key-button">一時保存</span>:
-                                <ul><li>内容を一時的に保存します。後で「日報一覧」タブから編集を再開できます。</li></ul>
-                            </li>
-                            <li><span class="key-action">申請する</span>:
-                                <ul><li><strong>承認者（チェッカー）に日報を提出します。</strong>申請後は編集できなくなります。</li></ul>
-                            </li>
-                        </ol>
-                        
-                        <h4>A-4. 経費精算（最終申請）を行う</h4>
-                        <p>
-                            日報が承認者によって**「承認済」**になると、経理担当者への最終的な経費精算が可能になります。
-                        </p>
-                        <ol>
-                            <li><strong>「経費精算」</strong>タブを開きます。</li>
-                            <li>「承認済」になった日報が一覧で表示されます。</li>
-                            <li>経理に提出したい申請に<strong>チェック</strong>を入れます。</li>
-                            <li><span class="key-action">選択した日報の精算申請を送信</span> ボタンを押します。</li>
-                            <li>ステータスが「精算申請済」となり、経理担当者のアプリにデータが連携されます。</li>
+                            <li><span class="key-button">一時保存</span>: 内容を保存します。</li>
+                            <li><span class="key-action">申請する</span>: <strong>承認者に日報を提出します。</strong>申請後は編集できなくなります。</li>
                         </ol>
                     </section>
                 </div>
@@ -585,15 +598,13 @@
                         </h3>
                         <p>
                             営業担当者以外の社員は「一般経費精算システム」を使用します。
-                            日報（タイムシート）の入力はありません。
                         </p>
                         
                         <h4>B-1. 経費を入力する</h4>
                         <ol>
                             <li><a href="#" onclick="document.getElementById('nav-links-tab').click(); return false;">「一般経費精算システム」</a>を開きます。</li>
-                            <li><strong>「経費申請」</strong>タブが選択されていることを確認します。</li>
-                            <li><strong>申請日</strong>と<strong>件名</strong>を入力します。（例: `大阪出張旅費精算`）</li>
-                            <li><span class="key-action"><i class="bi bi-plus-lg"></i> 経費明細を追加</span> ボタンを押します。</li>
+                            <li><strong>「経費申請」</strong>タブで、<strong>申請日</strong>と<strong>件名</strong>を入力します。</li>
+                            <li><span class="key-action"><i class="bi bi-plus-lg"></i> 経費明細を追加</span> ボタンを押して明細を追加します。</li>
                         </ol>
 
                         <!-- モックアップ: 一般経費入力画面 -->
@@ -602,101 +613,55 @@
                                 <i class="bi bi-pencil-square"></i> 経費申請・編集
                             </div>
                             <div class="mockup-body">
-                                <div class="mb-3 row g-3">
+                                <div class="row g-3 mb-3">
                                     <div class="col-md-3">
                                         <label class="form-label">申請日 <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control" value="2025-11-12">
                                     </div>
                                     <div class="col-md-5">
                                         <label class="form-label">件名 <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" placeholder="例: 〇〇出張旅費精算" value="大阪出張旅費精算">
+                                        <input type="text" class="form-control" placeholder="例: 大阪出張旅費精算">
                                     </div>
                                 </div>
-                                <hr>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span>経費明細</span>
-                                    <button class="btn btn-sm btn-primary" disabled>
-                                        <i class="bi bi-plus-lg"></i> 経費明細を追加
-                                    </button>
+                                <div class="table-responsive">
+                                    <table class="mockup-table">
+                                        <thead>
+                                            <tr>
+                                                <th>利用日</th>
+                                                <th>経費項目</th>
+                                                <th>金額 (円)</th>
+                                                <th>支払先/カード</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>2025/11/10</td>
+                                                <td>宿泊費</td>
+                                                <td>9,000</td>
+                                                <td><span class="badge bg-secondary">Card</span></td>
+                                                <td><button class="btn btn-sm btn-outline-primary" disabled><i class="bi bi-pencil"></i></button></td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot class="table-group-divider">
+                                            <tr>
+                                                <td colspan="2" class="text-end fw-bold">合計金額</td>
+                                                <td class="fw-bold text-danger fs-5">9,000 円</td>
+                                                <td colspan="2"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
                                 </div>
-                                <table class="mockup-table">
-                                    <thead>
-                                        <tr>
-                                            <th>利用日</th>
-                                            <th>経費項目</th>
-                                            <th>エリア</th>
-                                            <th>金額 (円)</th>
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>2025-11-10</td>
-                                            <td>宿泊費</td>
-                                            <td>大阪府</td>
-                                            <td>9,000</td>
-                                            <td><button class="btn btn-sm btn-outline-primary" disabled><i class="bi bi-pencil"></i></button></td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025-11-10</td>
-                                            <td>日当</td>
-                                            <td></td>
-                                            <td>2,500</td>
-                                            <td><button class="btn btn-sm btn-outline-primary" disabled><i class="bi bi-pencil"></i></button></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="5" class="text-center p-4">...</td>
-                                        </tr>
-                                    </tbody>
-                                    <tfoot class="table-group-divider">
-                                        <tr>
-                                            <td colspan="3" class="text-end fw-bold">合計金額</td>
-                                            <td class="fw-bold text-danger fs-5">11,500 円</td>
-                                            <td></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
                             </div>
                         </div>
 
                         <h4>B-2. 経費モーダルで詳細を入力する</h4>
-                        <ol>
-                            <li>ポップアップ画面（経費登録モーダル）が表示されます。</li>
-                            <li><strong>利用日</strong>、<strong>経費項目</strong>、<strong>金額（税込）</strong>を入力します。</li>
-                            <li><strong>（重要）</strong>
-                                「日当」や「宿泊費」を選択すると、<strong>規定額が自動で入力</strong>されます。
-                                <ul>
-                                    <li><strong>宿泊費の場合:</strong> 「エリア」を選択すると、宿泊費＋エリア追加分が自動計算されます。</li>
-                                    <li>自動入力された金額が上限額となります。</li>
-                                </ul>
-                            </li>
-                            <li><strong>領収書</strong>（`領収書を添付`ボタン）から、レシートや領収書の写真（画像）を添付します。</li>
-                            <li><span class="key-action">この内容で登録</span> ボタンを押してモーダルを閉じます。</li>
-                            <li>経費明細が一覧に追加されていることを確認します。</li>
-                        </ol>
-
-                        <h4>B-3. 申請を提出する</h4>
-                        <ol>
-                            <li>すべての経費明細を入力したら、画面下部のボタンを押します。</li>
-                            <li><span class="key-button">一時保存</span>:
-                                <ul><li>内容を一時的に保存します。後で「申請一覧」タブから編集を再開できます。</li></ul>
-                            </li>
-                            <li><span class="key-action">申請する</span>:
-                                <ul><li><strong>承認者（管理者）に申請を提出します。</strong>申請後は編集できなくなります。</li></ul>
-                            </li>
-                        </ol>
-                        
-                        <h4>B-4. 経費精算（最終申請）を行う</h4>
                         <p>
-                            申請が承認者によって**「承認済」**になると、経理担当者への最終的な経費精算が可能になります。
+                            営業用アプリと同様の画面が表示されます。
+                            <strong>利用日</strong>、<strong>経費項目</strong>、<strong>金額</strong>を入力し、カード利用の有無（スイッチ）や領収書添付を行ってください。
+                            <br>
+                            最後に <span class="key-action">この内容で登録</span> ボタンを押します。
                         </p>
-                        <ol>
-                            <li><strong>「経費精算 (最終)」</strong>タブを開きます。</li>
-                            <li>「承認済」になった申請が一覧で表示されます。</li>
-                            <li>経理に提出したい申請に<strong>チェック</strong>を入れます。</li>
-                            <li><span class="key-action">選択した申請の精算申請を送信</span> ボタンを押します。</li>
-                            <li>ステータスが「精算申請済」となり、経理担当者のアプリにデータが連携されます。</li>
-                        </ol>
                     </section>
                 </div>
 
@@ -708,88 +673,36 @@
                             【C】 承認者（チェッカー/管理者）向け
                         </h3>
                         <p>
-                            承認権限を持つ方（営業用アプリの「チェッカー」「承認者」、または一般用アプリの「管理者」）は、部下から提出された申請を承認または差戻しします。
+                            部下から提出された申請を承認または差戻しします。
+                            営業用・一般用の各アプリにある<strong>「承認待ち一覧」</strong>タブから操作します。
                         </p>
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle-fill"></i>
-                            <strong>注意: 承認するアプリが2つあります</strong><br>
-                            営業担当者の日報は「営業用日報システム」で、一般社員の経費は「一般経費精算システム」で承認作業を行ってください。
-                        </div>
 
                         <h4>C-1. 申請内容を確認する</h4>
                         <ol>
-                            <li>ご自身が承認を担当する方のアプリ（営業用 または 一般用）を開きます。</li>
-                            <li><strong>「チェック・承認待ち」</strong>タブ（または「承認待ち」タブ）を開きます。</li>
-                            <li>部下から提出された申請が一覧で表示されます。
-                                <small>※（営業用のみ）「要チェック（申請中）」と「要承認（チェック済）」の2段階で表示されます。</small>
-                            </li>
-                            <li>確認したい申請をクリックすると、詳細画面に移動します。</li>
+                            <li>「承認待ち一覧」タブを開きます。</li>
+                            <li>一覧から確認したい申請をクリックすると、詳細画面が表示されます。</li>
+                            <li>（営業用）ヘッダー情報（走行距離や活動時間）、活動明細、経費明細を確認します。</li>
+                            <li>（一般用）件名、備考、経費明細を確認します。</li>
                         </ol>
                         
-                        <!-- モックアップ: 承認待ち一覧 -->
-                        <div class="mockup-container">
-                            <div class="mockup-header">
-                                <i class="bi bi-check2-circle"></i> チェック・承認待ち一覧
-                            </div>
-                            <div class="mockup-body">
-                                <div class="accordion" id="approval-accordion-mock">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button">
-                                                <i class="bi bi-pencil-square me-2"></i>
-                                                要チェック（申請中）
-                                                <span class="badge bg-primary ms-2">1</span>
-                                            </button>
-                                        </h2>
-                                        <div class="accordion-collapse collapse show">
-                                            <table class="mockup-table mb-0">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>2025/11/11 (火)</td>
-                                                        <td>営業 太郎</td>
-                                                        <td><span class="text-danger fw-bold">チェック待ち</span></td>
-                                                        <td>12,000</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed" type="button">
-                                                <i class="bi bi-check2-circle me-2"></i>
-                                                要承認（チェック済）
-                                                <span class="badge bg-warning text-dark ms-2">0</span>
-                                            </button>
-                                        </h2>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <h4>C-2. 承認 または 差戻し を行う</h4>
+                        <h4>C-2. 承認 または 差戻し</h4>
                         <ol>
-                            <li>日報や経費明細、領収書の添付（<i class="bi bi-box-arrow-up-right"></i> アイコン）をよく確認します。</li>
                             <li>
                                 <strong>内容に問題がない場合:</strong>
-                                <ul>
-                                    <li>画面下部の <span class="key-action">チェック完了</span> または <span class="key-action">承認する</span> ボタンを押します。</li>
-                                    <li>（営業用の場合）チェッカーが「チェック完了」を押すと、次に最終承認者の「要承認」リストに移動します。</li>
-                                </ul>
+                                <ul><li>画面下部の <span class="key-action">承認する</span>（またはチェック完了）ボタンを押します。</li></ul>
                             </li>
                             <li>
-                                <strong>内容に不備がある場合:</strong>
+                                <strong>不備がある場合:</strong>
                                 <ul>
-                                    <li>画面下部の <span class="key-button" style="background-color: #f8d7da; border-color: #f5c2c7; color: #842029;">差戻し</span> ボタンを押します。</li>
-                                    <li><strong>差戻し理由</strong>を入力するポップアップが表示されるので、修正してほしい内容を具体的に入力し、OKを押します。</li>
-                                    <li>申請が「差戻し」ステータスで申請者本人に差し戻されます。</li>
+                                    <li><span class="key-button" style="background-color: #dc3545; color: white;">差戻し</span> ボタンを押します。</li>
+                                    <li>表示されるポップアップに<strong>差戻し理由</strong>を入力し、OKを押します。</li>
                                 </ul>
                             </li>
                         </ol>
                     </section>
                 </div>
                 
-                <!-- 6. 【D】 経理担当者向け -->
+                <!-- 6. 【D】 経理担当者向け (更新) -->
                 <div class="tab-pane fade" id="tab-accounting" role="tabpanel" aria-labelledby="nav-accounting-tab">
                     <section id="accounting">
                         <h3 class="d-flex align-items-center gap-3">
@@ -797,95 +710,125 @@
                             【D】 経理担当者向け
                         </h3>
                         <p>
-                            経理担当者は「経理用 支払処理アプリ」を使用します。
-                            営業用・一般用の両方のシステムから「精算申請済」として提出された、すべての経費をここで一括処理します。
+                            経理担当者は「経理用 振込処理アプリ」を使用します。
+                            各システムから「精算申請済」として提出された経費を一括処理します。
                         </p>
 
-                        <h4>D-1. 申請データを同期する</h4>
+                        <h4>D-1. 申請データの同期と一覧確認</h4>
                         <ol>
-                            <li><a href="#" onclick="document.getElementById('nav-links-tab').click(); return false;">「経理用 支払処理アプリ」</a>を開きます。</li>
-                            <li><span class="key-action"><i class="bi bi-arrow-clockwise"></i> 最新の申請データを取得</span> ボタンを押します。</li>
-                            <li>営業用・一般用の両方のシステムから「精算申請済」のデータが検索され、「支払待ち」として一覧に表示されます。</li>
+                            <li><a href="#" onclick="document.getElementById('nav-links-tab').click(); return false;">「経理用 振込処理アプリ」</a>を開きます。</li>
+                            <li><span class="key-action"><i class="bi bi-arrow-clockwise"></i> データ同期</span> ボタンを押して、最新の申請を取得します。</li>
+                            <li>「支払待ち申請一覧」が表示されます。</li>
+                            <li>必要に応じて <span class="key-button"><i class="bi bi-file-earmark-spreadsheet"></i> CSV出力</span> ボタンでデータをダウンロードできます。</li>
                         </ol>
 
-                        <!-- モックアップ: 経理用アプリ -->
+                        <!-- モックアップ: 経理用一覧 -->
                         <div class="mockup-container">
-                            <div class="mockup-header">
-                                <i class="bi bi-cash-stack"></i> 支払待ち申請一覧
-                            </div>
-                            <div class="mockup-body">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 id="pending-count">1 件</h6>
-                                    <div>
-                                        <input class="form-check-input" type="checkbox" id="check-all-mock">
-                                        <label class="form-check-label" for="check-all-mock">全選択</label>
-                                    </div>
+                            <div class="mockup-header d-flex justify-content-between">
+                                <span><i class="bi bi-list-check"></i> 支払待ち申請一覧</span>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary disabled"><i class="bi bi-arrow-clockwise"></i> データ同期</button>
+                                    <button class="btn btn-sm btn-outline-success disabled"><i class="bi bi-file-earmark-spreadsheet"></i> CSV出力</button>
                                 </div>
-                                <table class="mockup-table">
+                            </div>
+                            <div class="mockup-body p-0">
+                                <table class="mockup-table table-striped mb-0">
                                     <thead class="table-light">
                                         <tr>
                                             <th>選択</th>
                                             <th>日付</th>
                                             <th>システム</th>
                                             <th>申請者</th>
-                                            <th>件名 / ID</th>
-                                            <th>金額 (円)</th>
-                                            <th>詳細</th>
+                                            <th>件名</th>
+                                            <th class="text-end">金額 (円)</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><input class="form-check-input" type="checkbox"></td>
-                                            <td>2025-11-10</td>
+                                            <td class="text-center"><input type="checkbox"></td>
+                                            <td>2025/11/10</td>
                                             <td><span class="badge bg-secondary">一般用</span></td>
                                             <td>一般 太郎</td>
-                                            <td>大阪出張旅費精算 (...)</td>
-                                            <td class="text-danger fw-bold">11,500</td>
-                                            <td><button class="btn btn-sm btn-outline-primary" disabled><i class="bi bi-eye"></i> 詳細</button></td>
+                                            <td>大阪出張...</td>
+                                            <td class="text-end fw-bold">11,500</td>
+                                            <td class="text-center"><button class="btn btn-sm btn-outline-secondary rounded-pill px-3">詳細</button></td>
                                         </tr>
                                     </tbody>
-                                    <tfoot class="table-group-divider">
-                                        <tr>
-                                            <td colspan="5" class="text-end fw-bold">選択合計</td>
-                                            <td colspan="2" class="fw-bold text-danger fs-5">0 円</td>
-                                        </tr>
-                                    </tfoot>
                                 </table>
+                            </div>
+                            <div class="card-footer bg-white py-2 text-center border-top">
+                                <button class="btn btn-sm btn-outline-danger me-2">差し戻し</button>
+                                <button class="btn btn-sm btn-primary">支払済にする</button>
                             </div>
                         </div>
 
-                        <h4>D-2. 支払処理 または 差戻し を行う</h4>
+                        <h4>D-2. 詳細確認と修正 (モーダル)</h4>
                         <ol>
-                            <li>一覧で内容を確認します。詳細を見たい場合は <span class="key-button"><i class="bi bi-eye"></i> 詳細</span> ボタンを押すと、明細や領収書リンクが確認できます。</li>
-                            <li>
-                                <strong>支払処理を行う場合:</strong>
+                            <li>一覧の <span class="key-button">詳細</span> ボタンを押すと、<strong>詳細モーダル</strong>が開きます。</li>
+                            <li>ヘッダー情報（振込予定額、カード利用額など）と、明細行を確認します。</li>
+                            <li><strong>修正が必要な場合:</strong>
                                 <ul>
-                                    <li>支払いが完了した申請に<strong>チェック</strong>を入れます。</li>
-                                    <li>画面下部の <span class="key-action"><i class="bi bi-check-circle"></i> 選択した申請を支払済にする</span> ボタンを押します。</li>
-                                    <li>申請が「支払済」となり、一覧から消えます。（元の申請者のアプリ側でもステータスが「支払済」に更新されます）</li>
+                                    <li>右上の <span class="key-button"><i class="bi bi-toggle-off"></i> 編集モード</span> スイッチをONにします。</li>
+                                    <li>金額や経費項目が編集可能になります。修正後、<span class="key-action"><i class="bi bi-floppy"></i> 変更を保存</span> を押します。</li>
                                 </ul>
                             </li>
                             <li>
-                                <strong>不備があり差し戻す場合:</strong>
+                                <strong>処理の実行:</strong>
                                 <ul>
-                                    <li><strong>（推奨）</strong><span class="key-button"><i class="bi bi-eye"></i> 詳細</span> を押し、モーダル内の <span class="key-button" style="background-color: #f8d7da; border-color: #f5c2c7; color: #842029;">差し戻し</span> ボタンを押します。</li>
-                                    <li><strong>（一括）</strong>一覧で差し戻したい申請（1件）にチェックを入れ、<span class="key-button" style="background-color: #f8d7da; border-color: #f5c2c7; color: #842029;">選択した申請を差し戻し</span> ボタンを押します。</li>
-                                    <li><strong>差戻し理由</strong>を入力するポップアップが表示されます。
-                                        <small>※ここで入力した理由は、元の申請者に「差戻し理由」として通知されます。</small>
-                                    </li>
-                                    <li>申請が元の申請者に差し戻されます。（一覧から消えます）</li>
+                                    <li>問題なければ <span class="key-action">支払済にする</span> を押します。</li>
+                                    <li>差し戻す場合は <span class="key-button" style="color: #dc3545; border-color: #dc3545;">差し戻し</span> を押し、理由を入力して実行します。</li>
                                 </ul>
                             </li>
                         </ol>
 
-                        <h4>D-3. CSVエクスポート</h4>
-                        <p>
-                            現在「支払待ち」になっている一覧をCSVファイルとしてダウンロードします。会計ソフトへのインポートなどに利用できます。
-                        </p>
-                        <ol>
-                            <li>画面上部の <span class="key-button" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;"><i class="bi bi-file-earmark-spreadsheet"></i> CSVエクスポート</span> ボタンを押します。</li>
-                            <li>CSVファイル（`keiri_pending_...csv`）がダウンロードされます。</li>
-                        </ol>
+                        <!-- モックアップ: 経理詳細モーダル -->
+                        <div class="mockup-container">
+                            <div class="mockup-modal-content">
+                                <div class="mockup-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="bi bi-file-text"></i> 申請詳細</h5>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox">
+                                        <label class="form-check-label text-primary fw-bold">編集モード</label>
+                                    </div>
+                                </div>
+                                <div class="mockup-body bg-light">
+                                    <div class="card mb-3 p-3 border-0 shadow-sm">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h5 class="fw-bold">大阪出張旅費精算</h5>
+                                                <small class="text-muted">申請者: 一般 太郎 / 申請日: 2025/11/10</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <small class="text-muted">振込予定額</small>
+                                                <div class="fs-2 fw-bold text-primary">11,500 <span class="fs-5 text-secondary">円</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <table class="mockup-table bg-white">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>利用日</th>
+                                                <th>経費項目</th>
+                                                <th>金額</th>
+                                                <th>カード</th>
+                                                <th>精算金額</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>2025/11/10</td>
+                                                <td>宿泊費</td>
+                                                <td class="text-end">11,500</td>
+                                                <td class="text-end text-muted">-</td>
+                                                <td class="text-end fw-bold text-primary" style="background-color: #f0f8ff;">11,500</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
                     </section>
                 </div>
                 
@@ -930,16 +873,6 @@
                                 <ul><li>最終承認者権限を付与する場合、`承認` と入力します。</li></ul>
                             </li>
                         </ul>
-                        
-                        <h4>経理用アプリの権限設定</h4>
-                        <p>
-                            経理担当者の権限（isAccountant）は、`KeiriCode.gs` ファイル内で設定されています。
-                        </p>
-                        <ul>
-                            <li><small>※現在は、アクセスした全員に権限が付与される設定（`ACCOUNTANT_CHECK_MASTER_ID` のチェックが無効化）になっています。</small></li>
-                            <li><small>※本来は、`KeiriCode.gs`内の設定（`ACCOUNTANT_CHECK_COLUMN_NAME` と `ACCOUNTANT_CHECK_VALUE`）に基づき、社員マスタの特定の列（例: `所属部門 (コード)`）が特定の値（例: `100`）であるかで判定されます。</small></li>
-                        </ul>
-
                     </section>
                 </div>
                 
@@ -964,7 +897,6 @@
                                 <label for="request-detail" class="form-label">要望の詳細 <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="request-detail" rows="5" placeholder="例: 走行距離が自動計算されるタイミングについて追記してほしい。" required></textarea>
                             </div>
-                            <!-- (v12) 依頼者名は削除 -->
                             <button type="submit" class="btn btn-primary" id="submit-request-btn">
                                 <i class="bi bi-send-check"></i> この内容で送信する
                             </button>
@@ -995,7 +927,6 @@
                                         <th style="width: 15%;">受付日時</th>
                                         <th style="width: 15%;">ステータス</th>
                                         <th>タイトル</th>
-                                        <!-- (v12) 依頼者列を削除 -->
                                     </tr>
                                 </thead>
                                 <tbody id="status-list-body">
@@ -1019,11 +950,11 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- マニュアル用カスタムスクリプト (v13 修正) -->
+    <!-- マニュアル用カスタムスクリプト -->
     <script>
         // --- グローバル変数 ---
         var USER_INFO = <?!= userInfo ?>;
-        // (v13) リンクの元データを保持
+        // リンクの元データを保持
         var originalLinks = {};
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -1056,7 +987,7 @@
                 reloadBtn.addEventListener('click', loadRequestList);
             }
             
-            // --- (v13) リンク管理機能の初期化 ---
+            // --- リンク管理機能の初期化 ---
             var linksTab = document.getElementById('nav-links-tab');
             if (linksTab) {
                 // リンクタブがクリックされたら読み込む
@@ -1109,7 +1040,7 @@
             container.append(wrapper);
         }
 
-        // --- 修正要望を送信 (v12 修正) ---
+        // --- 修正要望を送信 ---
         function submitRequest() {
             var title = document.getElementById('request-title').value;
             var detail = document.getElementById('request-detail').value;
@@ -1151,7 +1082,7 @@
                 .submitRequest(requestData);
         }
 
-        // --- 進捗一覧を読み込み (v12 修正) ---
+        // --- 進捗一覧を読み込み ---
         function loadRequestList() {
             var tbody = document.getElementById('status-list-body');
             var reloadBtn = document.getElementById('reload-status-btn');
@@ -1177,7 +1108,7 @@
                 .getRequestList();
         }
         
-        // --- 進捗一覧を描画 (v12 修正) ---
+        // --- 進捗一覧を描画 ---
         function renderRequestList(data) {
             var tbody = document.getElementById('status-list-body');
             tbody.innerHTML = '';
@@ -1198,7 +1129,6 @@
                     statusClass = 'status-success';
                 }
                 
-                // (v12) 依頼者列を削除 (4列 -> 3列)
                 tr.innerHTML = [
                     '<td><small>' + (row['受付日時'] ? row['受付日時'].split(' ')[0] : 'N/A') + '</small></td>',
                     '<td><span class="status-badge ' + statusClass + '">' + escapeHTML(status) + '</span></td>',
@@ -1209,10 +1139,10 @@
             });
         }
         
-        // --- (v13) リンク管理機能 ---
+        // --- リンク管理機能 ---
         
         /**
-         * (v13) サーバーからリンクを取得して描画する
+         * サーバーからリンクを取得して描画する
          */
         function loadLinks(isEditMode = false) {
             showLoading(true);
@@ -1235,7 +1165,7 @@
         }
         
         /**
-         * (v13) リンクを描画する
+         * リンクを描画する
          */
         function renderLinks(links) {
             var container = document.getElementById('links-container');
@@ -1248,8 +1178,8 @@
                 { id: 'salesDB', desc: '1. 営業用日報システム (データベース)' },
                 { id: 'generalApp', desc: '2. 一般経費精算システム (Webアプリ)' },
                 { id: 'generalDB', desc: '2. 一般経費精算システム (データ用DB)' },
-                { id: 'accountingApp', desc: '3. 経理用 支払処理アプリ (Webアプリ)' },
-                { id: 'accountingDB', desc: '3. 経理用 支払処理アプリ (データベース)' }
+                { id: 'accountingApp', desc: '3. 経理用 振込処理アプリ (Webアプリ)' },
+                { id: 'accountingDB', desc: '3. 経理用 振込処理アプリ (データベース)' }
             ];
             
             linkOrder.forEach(function(item) {
@@ -1266,7 +1196,7 @@
         }
         
         /**
-         * (v13) リンクの編集モードを切り替える
+         * リンクの編集モードを切り替える
          */
         function toggleLinkEditMode(isEdit) {
             var container = document.getElementById('links-container');
@@ -1292,7 +1222,7 @@
         }
         
         /**
-         * (v13) 編集したリンクを保存する
+         * 編集したリンクを保存する
          */
         function saveLinks() {
             var linksToSave = {};
