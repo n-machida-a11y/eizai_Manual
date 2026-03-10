@@ -36,25 +36,27 @@ function doGet(e) {
 function getUserInfo_() {
   var email = Session.getEffectiveUser().getEmail();
   var name = 'ゲスト';
+  var isAccounting = false;
 
   try {
     var ss = SpreadsheetApp.openById(MASTER_DB_ID);
-    var data = getSheetData_(ss.getSheetByName('社員マスタ')); 
-    
+    var data = getSheetData_(ss.getSheetByName('社員マスタ'));
+
     for (var i = 0; i < data.length; i++) {
       if (data[i]['アドレス'] === email) {
         name = data[i]['社員名'];
+        isAccounting = data[i]['経理アプリアクセス'] === '有';
         break;
       }
     }
   } catch (e) {
     Logger.log('getUserInfo_ Error: ' + e);
   }
-  
+
   // (v13) 管理者かどうかを判定
   var isAdmin = ADMIN_USERS.indexOf(email) > -1;
-  
-  return { name: name, email: email, isAdmin: isAdmin }; // (v13) isAdmin を追加
+
+  return { name: name, email: email, isAdmin: isAdmin, isAccounting: isAccounting };
 }
 
 /**

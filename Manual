@@ -1175,12 +1175,17 @@
             // 定義済みの順番で描画
             var linkOrder = [
                 { id: 'salesApp', desc: '1. 営業用日報システム (Webアプリ)' },
-                { id: 'salesDB', desc: '1. 営業用日報システム (データベース)' },
+                { id: 'salesDB', desc: '1. 営業用日報システム (データベース)', dbOnly: true },
                 { id: 'generalApp', desc: '2. 一般経費精算システム (Webアプリ)' },
-                { id: 'generalDB', desc: '2. 一般経費精算システム (データ用DB)' },
+                { id: 'generalDB', desc: '2. 一般経費精算システム (データ用DB)', dbOnly: true },
                 { id: 'accountingApp', desc: '3. 経理用 振込処理アプリ (Webアプリ)' },
-                { id: 'accountingDB', desc: '3. 経理用 振込処理アプリ (データベース)' }
+                { id: 'accountingDB', desc: '3. 経理用 振込処理アプリ (データベース)', dbOnly: true }
             ];
+
+            // 経理担当者でない場合、DBリンクを非表示にする
+            if (!USER_INFO.isAccounting) {
+                linkOrder = linkOrder.filter(function(item) { return !item.dbOnly; });
+            }
             
             linkOrder.forEach(function(item) {
                 var url = links[item.id] || '';
