@@ -149,11 +149,15 @@ function getAppLinks() {
     }
     
     var data = getSheetData_(sheet);
+    var userInfo = getUserInfo_();
+    var DB_IDS = ['salesDB', 'generalDB', 'accountingDB'];
     var links = {};
     data.forEach(function(row) {
+      // 経理担当者でない場合はDBリンクを返さない
+      if (DB_IDS.indexOf(row.ID) > -1 && !userInfo.isAccounting) return;
       links[row.ID] = row.URL;
     });
-    
+
     return { status: 'success', links: links };
   } catch (e) {
     Logger.log('getAppLinks Error: ' + e);
